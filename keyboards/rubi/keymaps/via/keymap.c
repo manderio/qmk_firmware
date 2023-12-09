@@ -20,7 +20,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* Base */
     [0] = LAYOUT(
                                        ENC_PRESS,
-            KC_NLCK, KC_PSLS, KC_PAST, KC_PMNS,
+            KC_NUM , KC_PSLS, KC_PAST, KC_PMNS,
             KC_P7  , KC_P8  , KC_P9  , KC_PPLS,
             KC_P4  , KC_P5  , KC_P6  ,
             KC_P1  , KC_P2  , KC_P3  , KC_PENT,
@@ -46,8 +46,39 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                        KC_TRNS,
             KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
             KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
-            KC_TRNS, RESET  , KC_TRNS,
+            KC_TRNS, QK_BOOT  , KC_TRNS,
             KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
                      KC_TRNS, KC_TRNS
             ),
 };
+
+bool encoder_update_user(uint8_t index, bool clockwise) {
+    if (index == 0) {
+        if (get_highest_layer(layer_state) == 0) {
+            uint16_t mapped_code = 0;
+            if (clockwise) {
+                mapped_code = handle_encoder_cw();
+            } else {
+                mapped_code = handle_encoder_ccw();
+            }
+            if (mapped_code != 0) {
+                tap_code16(mapped_code);
+            }
+        } else {
+            if (clockwise) {
+                if (oled_mode == OLED_MODE_CALC) {
+                    handle_encoder_cw();
+                } else if (oled_mode == OLED_MODE_DEFAULT) {
+                    change_encoder_mode(false);
+                }
+            } else {
+                if (oled_mode == OLED_MODE_CALC) {
+                    handle_encoder_ccw();
+                } else if (oled_mode == OLED_MODE_DEFAULT) {
+                    change_encoder_mode(true);
+                }
+            }
+        }
+    }
+    return true;
+}
